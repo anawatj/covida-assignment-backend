@@ -19,33 +19,41 @@ namespace Implements.Services
         private IMapper mapper;
         private AppDbContext db;
         private IUserRepository userRepository;
-        public ProductService(AppDbContext db,IMapper mapper,IUserRepository userRepository,IProductRepository productRepository)
+        private ICategoryRepository categoryRepository;
+        public ProductService(AppDbContext db,IMapper mapper,IUserRepository userRepository,ICategoryRepository categoryRepository,IProductRepository productRepository)
         {
             this.db = db;
             this.mapper = mapper;
             this.productRepository = productRepository;
             this.userRepository = userRepository;
+            this.categoryRepository = categoryRepository;
         }
-        public Product CreateProduct(Product data, string userId)
+        public ProductDto CreateProduct(ProductInputDto input, string userId)
         {
             var existUser = this.userRepository.FindById(userId);
             if (existUser == null)
             {
                 throw new UnAuthorizeException("UnAuthorize");
             }
-            List<string> errors = Validate(data);
+            List<string> errors = Validate(input);
             if (errors.Count > 0)
             {
                 throw new FieldValueException(String.Join(",", errors));
             }
-            Product? product = this.productRepository.FindByName(data.ProductName);
+            Product? product = this.productRepository.FindByName(input.ProductName);
             if (product != null)
             {
                 throw new BadRequestException("Product Name is used");
             }
+            Category? category = this.categoryRepository.FindById(input.CategoryId);
+            if (category == null)
+            {
+                throw new BadRequestException("Category is not found");
+            }
+            Product data = mapper.Map<ProductInputDto, Product>(input);
             data.Id = UUID.GenerateUUID();
             Product ret = this.productRepository.Save(data);
-            return ret;
+            return mapper.Map<Product,ProductDto>(ret);
         }
 
         public void DeleteProduct(string productId, string userId)
@@ -78,7 +86,7 @@ namespace Implements.Services
             return mapper.Map<List<Product>, List<ProductDto>>(products);
         }
 
-        public Product FindProductById(string productId, string userId)
+        public ProductDto FindProductById(string productId, string userId)
         {
             var existUser = this.userRepository.FindById(userId);
             if (existUser == null)
@@ -90,35 +98,41 @@ namespace Implements.Services
             {
                 throw new NotFoundException("Product Not Found");
             }
-            return product;
+            return mapper.Map<Product,ProductDto>(product);
         }
 
-        public Product UpdateProduct(Product data, string userId)
+        public ProductDto UpdateProduct(ProductInputDto input, string userId)
         {
             var existUser = this.userRepository.FindById(userId);
             if (existUser == null)
             {
                 throw new UnAuthorizeException("UnAuthorize");
             }
-            List<string> errors = Validate(data);
+            List<string> errors = Validate(input);
             if (errors.Count > 0)
             {
                 throw new FieldValueException(String.Join(",", errors));
             }
-            Product? product = this.productRepository.FindByName(data.ProductName);
+            Product? product = this.productRepository.FindByName(input.ProductName);
             if (product != null)
             {
-                if(data.Id != product.Id)
+                if(input.Id != product.Id)
                 {
                     throw new BadRequestException("Product Name is used");
                 }
              
             }
+            Category? category = this.categoryRepository.FindById(input.CategoryId);
+            if (category == null)
+            {
+                throw new BadRequestException("Category Not Found");
+            }
+            Product data = mapper.Map<ProductInputDto, Product>(input);
             Product ret = this.productRepository.Update(data);
-            return ret;
+            return mapper.Map<Product,ProductDto>(ret);
         }
 
-        public List<string> Validate(Product data)
+        public List<string> Validate(ProductInputDto data)
         {
             List<string> errors = new List<string>();
             if (string.IsNullOrEmpty(data.ProductName))

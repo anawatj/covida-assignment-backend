@@ -32,6 +32,15 @@ namespace API
                 .ForMember(t => t.Description, t => t.MapFrom(t => t.Description))
                 .ForMember(t => t.Price, t => t.MapFrom(t => t.Price));
 
+
+                config.CreateMap<ProductInputDto, Product>()
+                .ForMember(t => t.Id, t => t.MapFrom(t => t.Id))
+                .ForMember(t => t.ProductName, t => t.MapFrom(t => t.ProductName))
+                .ForMember(t => t.Title, t => t.MapFrom(t => t.Title))
+                .ForMember(t => t.CategoryId, t => t.MapFrom(t => t.CategoryId))
+                .ForMember(t => t.Description, t => t.MapFrom(t => t.Description))
+                .ForMember(t => t.Price, t => t.MapFrom(t => t.Price));
+
                 config.CreateMap<User, UserDto>()
                 .ForMember(t => t.Id, t => t.MapFrom(t => t.Id))
                 .ForMember(t => t.Email, t => t.MapFrom(t => t.Email))

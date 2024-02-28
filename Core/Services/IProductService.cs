@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace Core.Services
 {
-    public interface IProductService : IService<Product>
+    public interface IProductService : IService<ProductInputDto>
     {
-        public Product CreateProduct(Product product,string userId);
+        public ProductDto CreateProduct(ProductInputDto product,string userId);
 
-        public Product UpdateProduct(Product product,string userId);
+        public ProductDto UpdateProduct(ProductInputDto product,string userId);
 
         public void DeleteProduct(string productId,string userId);
 
         public List<ProductDto> FindAllProduct(string userId);
 
-        public Product FindProductById(string productId,string userId);
+        public ProductDto FindProductById(string productId,string userId);
 
 
    
